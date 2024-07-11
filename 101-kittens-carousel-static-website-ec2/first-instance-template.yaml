@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: First Template created.
+
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-06c68f701d8090592"
+      InstanceType: "t2.micro"
+      KeyName: firstkey
+      SecurityGroups:
+        - !Ref MySecGroup
+      Tags: 
+        - Key: Name
+          Value: Deco
+
+  MySecGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: sec grup created
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+
+
+
+
