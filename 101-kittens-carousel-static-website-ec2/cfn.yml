@@ -7,19 +7,50 @@ Description: |
   is downloaded from my Public Github repository, then deployed on Apache Web Server.
 
 Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-x86_64'
   
-Resources: 
-  
-  myWebServer:
-    
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: "t2.micro"
+      ImageId: !Ref LatestAmiId
+      SecurityGroups:
+        - !Ref MySecGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo yum update -y
+          sudo yum install unzip wget -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd
+          cd /tmp/
+          wget https://github.com/Demirkol14/KittenProject/archive/refs/heads/main.zip
+          unzip main.zip
+          cd KittenProject-main/101-kittens-carousel-static-website-ec2/static-web
+          sudo mv * /var/www/html/
+          cd /tmp/
+          rm -rf KittenProject-main main.zip
+          sudo systemctl restart httpd
 
-  mySecGrp:
-    
+      Tags: 
+        - Key: Name
+          Value: "StackName'in Web Sunucusu"
+  
+  MySecGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: Sec group added
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
 
 Outputs:
-  webSiteURL:
-    Description: URL of website
-    Value: !Sub
-      - 
-      - 
-   
+  WebSiteURL:
+    Description: URL of the deployed website
+    Value: !Sub "http://${MyEC2Instance.PublicDnsName}/"
